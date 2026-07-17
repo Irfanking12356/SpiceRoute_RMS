@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}RMS{% endblock %} · Restaurant Management System</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">🍽️ <span>SpiceRoute RMS</span></div>
+  <nav>
+    <a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint=='dashboard' }}">Tables</a>
+    <a href="{{ url_for('kitchen') }}" class="{{ 'active' if request.endpoint=='kitchen' }}">Kitchen</a>
+    <a href="{{ url_for('billing_list') }}" class="{{ 'active' if request.endpoint in ['billing_list','bill'] }}">Billing</a>
+    <a href="{{ url_for('menu_list') }}" class="{{ 'active' if request.endpoint=='menu_list' }}">Menu</a>
+    <a href="{{ url_for('reports') }}" class="{{ 'active' if request.endpoint=='reports' }}">Reports</a>
+  </nav>
+</header>
+
+<main class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-wrap">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

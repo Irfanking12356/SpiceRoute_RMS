@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Tables{% endblock %}
+{% block content %}
+<h1>Table Status</h1>
+<p class="subtitle">Tap a table to seat guests or manage its order.</p>
+
+<div class="table-grid">
+  {% for t in tables %}
+  <div class="table-card status-{{ t.status }}">
+    <div class="table-num">Table {{ t.number }}</div>
+    <div class="table-cap">Seats {{ t.capacity }}</div>
+    <div class="table-status">{{ t.status.replace('_',' ')|title }}</div>
+
+    {% if t.status == 'available' %}
+      <form method="POST" action="{{ url_for('seat_table', table_id=t.id) }}">
+        <button class="btn btn-primary" type="submit">Seat Guests</button>
+      </form>
+    {% elif t.status == 'ordering' %}
+      {% set active_order = t.orders|selectattr('status','equalto','open')|list|last %}
+      {% if active_order %}
+      <a class="btn btn-secondary" href="{{ url_for('build_order', order_id=active_order.id) }}">Continue Order</a>
+      {% endif %}
+    {% elif t.status == 'kitchen' %}
+      <a class="btn btn-secondary" href="{{ url_for('kitchen') }}">View Kitchen</a>
+    {% elif t.status == 'ready' %}
+      {% set ready_order = t.orders|selectattr('status','equalto','ready')|list|last %}
+      {% if ready_order %}
+      <a class="btn btn-primary" href="{{ url_for('bill', order_id=ready_order.id) }}">Generate Bill</a>
+      {% endif %}
+    {% elif t.status == 'billing' %}
+      {% set bill_order = t.orders|rejectattr('status','equalto','billed')|list|last %}
+      {% if bill_order %}
+      <a class="btn btn-secondary" href="{{ url_for('bill', order_id=bill_order.id) }}">Open Bill</a>
+      {% endif %}
+      <form method="POST" action="{{ url_for('free_table', table_id=t.id) }}">
+        <button class="btn btn-ghost" type="submit">Force Free</button>
+      </form>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<div class="legend">
+  <span class="dot status-available"></span> Available
+  <span class="dot status-ordering"></span> Ordering
+  <span class="dot status-kitchen"></span> In Kitchen
+  <span class="dot status-ready"></span> Ready
+  <span class="dot status-billing"></span> Billing
+</div>
+{% endblock %}

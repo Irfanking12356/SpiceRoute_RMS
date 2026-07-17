@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<h1>Sales Reports</h1>
+<p class="subtitle">History of settled bills.</p>
+
+<div class="summary-card">
+  <div>Total Settled Orders</div>
+  <div class="big-num">{{ orders|length }}</div>
+</div>
+<div class="summary-card">
+  <div>Total Sales</div>
+  <div class="big-num">Rs. {{ "%.2f"|format(total_sales) }}</div>
+</div>
+
+{% if orders %}
+<table class="order-table wide">
+  <thead><tr><th>Table</th><th>Date</th><th>Items</th><th>Total</th></tr></thead>
+  <tbody>
+    {% for order in orders %}
+    <tr>
+      <td>Table {{ order.table.number }}</td>
+      <td>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+      <td>{{ order.items|length }}</td>
+      <td>Rs. {{ "%.2f"|format(order.total) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty-state">No settled orders yet.</p>
+{% endif %}
+{% endblock %}

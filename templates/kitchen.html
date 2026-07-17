@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Kitchen Display{% endblock %}
+{% block content %}
+<h1>Kitchen Display</h1>
+<p class="subtitle">Live queue of tickets. Update item status as it's prepared.</p>
+
+{% if orders %}
+<div class="ticket-grid">
+  {% for order in orders %}
+  <div class="kitchen-ticket">
+    <div class="ticket-header">
+      Table {{ order.table.number }}
+      <span class="ticket-time">{{ order.created_at.strftime('%H:%M') }}</span>
+    </div>
+    <ul class="ticket-items">
+      {% for item in order.items %}
+      <li class="ticket-item status-{{ item.status }}">
+        <span>{{ item.quantity }}x {{ item.menu_item.name }}</span>
+        <span class="item-controls">
+          {% if item.status == 'queued' %}
+          <form method="POST" action="{{ url_for('update_item_status', item_id=item.id) }}">
+            <input type="hidden" name="status" value="preparing">
+            <button class="btn btn-small btn-secondary" type="submit">Start</button>
+          </form>
+          {% elif item.status == 'preparing' %}
+          <form method="POST" action="{{ url_for('update_item_status', item_id=item.id) }}">
+            <input type="hidden" name="status" value="ready">
+            <button class="btn btn-small btn-primary" type="submit">Ready</button>
+          </form>
+          {% else %}
+          <span class="badge-ready">✓ Ready</span>
+          {% endif %}
+        </span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p class="empty-state">No active tickets right now.</p>
+{% endif %}
+{% endblock %}

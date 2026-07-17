@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Billing{% endblock %}
+{% block content %}
+<h1>Billing</h1>
+<p class="subtitle">Orders ready for settlement or still in progress.</p>
+
+{% if orders %}
+<table class="order-table wide">
+  <thead><tr><th>Table</th><th>Status</th><th>Items</th><th>Total</th><th></th></tr></thead>
+  <tbody>
+    {% for order in orders %}
+    <tr>
+      <td>Table {{ order.table.number }}</td>
+      <td><span class="badge">{{ order.status.replace('_',' ')|title }}</span></td>
+      <td>{{ order.items|length }}</td>
+      <td>Rs. {{ "%.2f"|format(order.total) }}</td>
+      <td><a class="btn btn-small btn-primary" href="{{ url_for('bill', order_id=order.id) }}">Open</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty-state">No orders pending billing.</p>
+{% endif %}
+{% endblock %}

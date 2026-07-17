@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Menu & Inventory{% endblock %}
+{% block content %}
+<h1>Menu &amp; Inventory</h1>
+<p class="subtitle">Manage items, categories, prices, and stock levels.</p>
+
+{% set category_images = {
+  'Starter':  'images/starters.png',
+  'Main':     'images/mains.png',
+  'Bread':    'images/breads.png',
+  'Dessert':  'images/dessert.png',
+  'Beverage': 'images/beverages.png'
+} %}
+
+<div class="menu-manage-layout">
+  <div class="menu-manage-table">
+    <table class="order-table wide">
+      <thead><tr><th>Photo</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Available</th><th></th></tr></thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td>
+            {% set img = category_images.get(item.category) %}
+            {% if img %}
+              <img src="{{ url_for('static', filename=img) }}" alt="{{ item.category }}" class="menu-thumb">
+            {% else %}
+              <div class="menu-thumb-placeholder">🍽️</div>
+            {% endif %}
+          </td>
+          <td><input class="inline-input" form="edit-{{ item.id }}" type="text" name="name" value="{{ item.name }}" required></td>
+          <td><input class="inline-input" form="edit-{{ item.id }}" type="text" name="category" value="{{ item.category }}"></td>
+          <td><input class="inline-input small" form="edit-{{ item.id }}" type="number" step="0.01" name="price" value="{{ item.price }}"></td>
+          <td><input class="inline-input small" form="edit-{{ item.id }}" type="number" name="stock_qty" value="{{ item.stock_qty }}"></td>
+          <td><input form="edit-{{ item.id }}" type="checkbox" name="available" {{ 'checked' if item.available }}></td>
+          <td class="row-actions">
+            <button class="btn btn-small btn-secondary" form="edit-{{ item.id }}" type="submit">Save</button>
+            <button class="btn btn-small btn-ghost" form="delete-{{ item.id }}" type="submit" onclick="return confirm('Remove this item?');">Delete</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {% for item in items %}
+    <form id="edit-{{ item.id }}" method="POST" action="{{ url_for('menu_edit', item_id=item.id) }}"></form>
+    <form id="delete-{{ item.id }}" method="POST" action="{{ url_for('menu_delete', item_id=item.id) }}"></form>
+    {% endfor %}
+  </div>
+
+  <div class="menu-add-panel">
+    <h2>Add New Item</h2>
+    <form method="POST" action="{{ url_for('menu_add') }}" class="add-item-form">
+      <label>Name<input type="text" name="name" required></label>
+      <label>Category<input type="text" name="category" placeholder="e.g. Main, Starter"></label>
+      <label>Price (Rs.)<input type="number" step="0.01" name="price" required></label>
+      <label>Stock Qty<input type="number" name="stock_qty" value="50"></label>
+      <button class="btn btn-primary btn-block" type="submit">Add Item</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

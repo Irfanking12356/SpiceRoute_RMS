@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Order - Table {{ order.table.number }}{% endblock %}
+{% block content %}
+<h1>Order · Table {{ order.table.number }}</h1>
+
+{% set category_images = {
+  'Starter':  'images/starters.png',
+  'Main':     'images/mains.png',
+  'Bread':    'images/breads.png',
+  'Dessert':  'images/dessert.png',
+  'Beverage': 'images/beverages.png'
+} %}
+
+<div class="order-layout">
+  <div class="menu-panel">
+    <h2>Menu</h2>
+    {% for category, items in menu_by_category.items() %}
+      <h3 class="menu-category">{{ category }}</h3>
+      <div class="menu-items">
+        {% for item in items %}
+        <form method="POST" action="{{ url_for('add_item', order_id=order.id) }}" class="menu-item-card">
+          <input type="hidden" name="menu_item_id" value="{{ item.id }}">
+          {% set img = category_images.get(category) %}
+          {% if img %}
+          <div class="menu-item-img-wrap">
+            <img src="{{ url_for('static', filename=img) }}" alt="{{ item.name }}" class="menu-item-img">
+          </div>
+          {% else %}
+          <div class="menu-item-img-placeholder">🍽️</div>
+          {% endif %}
+          <div class="menu-item-name">{{ item.name }}</div>
+          <div class="menu-item-price">Rs. {{ "%.2f"|format(item.price) }}</div>
+          <div class="menu-item-actions">
+            <input type="number" name="qty" value="1" min="1" class="qty-input">
+            <button class="btn btn-small btn-primary" type="submit">Add</button>
+          </div>
+        </form>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="ticket-panel">
+    <h2>Current Order</h2>
+    {% if order.items %}
+    <table class="order-table">
+      <thead><tr><th>Item</th><th>Qty</th><th>Price</th><th></th></tr></thead>
+      <tbody>
+        {% for i in order.items %}
+        <tr>
+          <td>{{ i.menu_item.name }}</td>
+          <td>{{ i.quantity }}</td>
+          <td>Rs. {{ "%.2f"|format(i.price_at_order * i.quantity) }}</td>
+          <td>
+            {% if order.status == 'open' %}
+            <form method="POST" action="{{ url_for('remove_item', order_id=order.id, item_id=i.id) }}">
+              <button class="btn btn-ghost btn-small" type="submit">✕</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="order-summary">
+      <div>Subtotal: <strong>Rs. {{ "%.2f"|format(order.subtotal) }}</strong></div>
+      <div>Tax (5%): <strong>Rs. {{ "%.2f"|format(order.tax) }}</strong></div>
+      <div class="total">Total: <strong>Rs. {{ "%.2f"|format(order.total) }}</strong></div>
+    </div>
+    {% else %}
+    <p class="empty-state">No items added yet. Select from the menu.</p>
+    {% endif %}
+
+    {% if order.status == 'open' %}
+    <form method="POST" action="{{ url_for('submit_order', order_id=order.id) }}">
+      <button class="btn btn-primary btn-block" type="submit">Send to Kitchen</button>
+    </form>
+    {% else %}
+    <p class="badge">Status: {{ order.status.replace('_',' ')|title }}</p>
+    {% endif %}
+    <a class="back-link" href="{{ url_for('dashboard') }}">← Back to tables</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Bill - Table {{ order.table.number }}{% endblock %}
+{% block content %}
+<h1>Invoice · Table {{ order.table.number }}</h1>
+
+<div class="invoice">
+  <table class="order-table">
+    <thead><tr><th>Item</th><th>Qty</th><th>Unit Price</th><th>Amount</th></tr></thead>
+    <tbody>
+      {% for i in order.items %}
+      <tr>
+        <td>{{ i.menu_item.name }}</td>
+        <td>{{ i.quantity }}</td>
+        <td>Rs. {{ "%.2f"|format(i.price_at_order) }}</td>
+        <td>Rs. {{ "%.2f"|format(i.price_at_order * i.quantity) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="order-summary">
+    <div>Subtotal: <strong>Rs. {{ "%.2f"|format(order.subtotal) }}</strong></div>
+    <div>Tax ({{ (tax_rate*100)|int }}%): <strong>Rs. {{ "%.2f"|format(order.tax) }}</strong></div>
+    <div class="total">Grand Total: <strong>Rs. {{ "%.2f"|format(order.total) }}</strong></div>
+  </div>
+
+  {% if order.status != 'billed' %}
+  <form method="POST" action="{{ url_for('pay', order_id=order.id) }}">
+    <button class="btn btn-primary btn-block" type="submit">Mark as Paid</button>
+  </form>
+  {% else %}
+  <p class="badge-ready">✓ Paid</p>
+  {% endif %}
+  <a class="back-link" href="{{ url_for('dashboard') }}">← Back to tables</a>
+</div>
+{% endblock %}
